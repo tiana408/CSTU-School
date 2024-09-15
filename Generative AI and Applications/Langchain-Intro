@@ -1,0 +1,706 @@
+{
+  "nbformat": 4,
+  "nbformat_minor": 0,
+  "metadata": {
+    "colab": {
+      "provenance": []
+    },
+    "kernelspec": {
+      "name": "python3",
+      "display_name": "Python 3"
+    },
+    "language_info": {
+      "name": "python"
+    }
+  },
+  "cells": [
+    {
+      "cell_type": "code",
+      "source": [
+        "import os"
+      ],
+      "metadata": {
+        "id": "tgtlTmwz64kp"
+      },
+      "execution_count": 1,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "os.environ[\"OPENAI_API_KEY\"] = 'MYKEY'"
+      ],
+      "metadata": {
+        "id": "g4cdSehj67u8"
+      },
+      "execution_count": 2,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "api_key = os.getenv(\"OPENAI_API_KEY\")"
+      ],
+      "metadata": {
+        "id": "zRTj-rIM7AQK"
+      },
+      "execution_count": 3,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "!pip install langchain --upgrade"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "AOpzPeEd7CRN",
+        "outputId": "0de5c25f-1dd2-4d2e-c7cc-e085e988b4ef"
+      },
+      "execution_count": 4,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "Collecting langchain\n",
+            "  Downloading langchain-0.3.0-py3-none-any.whl.metadata (7.1 kB)\n",
+            "Requirement already satisfied: PyYAML>=5.3 in /usr/local/lib/python3.10/dist-packages (from langchain) (6.0.2)\n",
+            "Requirement already satisfied: SQLAlchemy<3,>=1.4 in /usr/local/lib/python3.10/dist-packages (from langchain) (2.0.34)\n",
+            "Requirement already satisfied: aiohttp<4.0.0,>=3.8.3 in /usr/local/lib/python3.10/dist-packages (from langchain) (3.10.5)\n",
+            "Requirement already satisfied: async-timeout<5.0.0,>=4.0.0 in /usr/local/lib/python3.10/dist-packages (from langchain) (4.0.3)\n",
+            "Collecting langchain-core<0.4.0,>=0.3.0 (from langchain)\n",
+            "  Downloading langchain_core-0.3.0-py3-none-any.whl.metadata (6.2 kB)\n",
+            "Collecting langchain-text-splitters<0.4.0,>=0.3.0 (from langchain)\n",
+            "  Downloading langchain_text_splitters-0.3.0-py3-none-any.whl.metadata (2.3 kB)\n",
+            "Collecting langsmith<0.2.0,>=0.1.17 (from langchain)\n",
+            "  Downloading langsmith-0.1.120-py3-none-any.whl.metadata (13 kB)\n",
+            "Requirement already satisfied: numpy<2,>=1 in /usr/local/lib/python3.10/dist-packages (from langchain) (1.26.4)\n",
+            "Requirement already satisfied: pydantic<3.0.0,>=2.7.4 in /usr/local/lib/python3.10/dist-packages (from langchain) (2.9.1)\n",
+            "Requirement already satisfied: requests<3,>=2 in /usr/local/lib/python3.10/dist-packages (from langchain) (2.32.3)\n",
+            "Collecting tenacity!=8.4.0,<9.0.0,>=8.1.0 (from langchain)\n",
+            "  Downloading tenacity-8.5.0-py3-none-any.whl.metadata (1.2 kB)\n",
+            "Requirement already satisfied: aiohappyeyeballs>=2.3.0 in /usr/local/lib/python3.10/dist-packages (from aiohttp<4.0.0,>=3.8.3->langchain) (2.4.0)\n",
+            "Requirement already satisfied: aiosignal>=1.1.2 in /usr/local/lib/python3.10/dist-packages (from aiohttp<4.0.0,>=3.8.3->langchain) (1.3.1)\n",
+            "Requirement already satisfied: attrs>=17.3.0 in /usr/local/lib/python3.10/dist-packages (from aiohttp<4.0.0,>=3.8.3->langchain) (24.2.0)\n",
+            "Requirement already satisfied: frozenlist>=1.1.1 in /usr/local/lib/python3.10/dist-packages (from aiohttp<4.0.0,>=3.8.3->langchain) (1.4.1)\n",
+            "Requirement already satisfied: multidict<7.0,>=4.5 in /usr/local/lib/python3.10/dist-packages (from aiohttp<4.0.0,>=3.8.3->langchain) (6.1.0)\n",
+            "Requirement already satisfied: yarl<2.0,>=1.0 in /usr/local/lib/python3.10/dist-packages (from aiohttp<4.0.0,>=3.8.3->langchain) (1.11.1)\n",
+            "Collecting jsonpatch<2.0,>=1.33 (from langchain-core<0.4.0,>=0.3.0->langchain)\n",
+            "  Downloading jsonpatch-1.33-py2.py3-none-any.whl.metadata (3.0 kB)\n",
+            "Requirement already satisfied: packaging<25,>=23.2 in /usr/local/lib/python3.10/dist-packages (from langchain-core<0.4.0,>=0.3.0->langchain) (24.1)\n",
+            "Requirement already satisfied: typing-extensions>=4.7 in /usr/local/lib/python3.10/dist-packages (from langchain-core<0.4.0,>=0.3.0->langchain) (4.12.2)\n",
+            "Collecting httpx<1,>=0.23.0 (from langsmith<0.2.0,>=0.1.17->langchain)\n",
+            "  Downloading httpx-0.27.2-py3-none-any.whl.metadata (7.1 kB)\n",
+            "Collecting orjson<4.0.0,>=3.9.14 (from langsmith<0.2.0,>=0.1.17->langchain)\n",
+            "  Downloading orjson-3.10.7-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (50 kB)\n",
+            "\u001b[2K     \u001b[90m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\u001b[0m \u001b[32m50.4/50.4 kB\u001b[0m \u001b[31m424.4 kB/s\u001b[0m eta \u001b[36m0:00:00\u001b[0m\n",
+            "\u001b[?25hRequirement already satisfied: annotated-types>=0.6.0 in /usr/local/lib/python3.10/dist-packages (from pydantic<3.0.0,>=2.7.4->langchain) (0.7.0)\n",
+            "Requirement already satisfied: pydantic-core==2.23.3 in /usr/local/lib/python3.10/dist-packages (from pydantic<3.0.0,>=2.7.4->langchain) (2.23.3)\n",
+            "Requirement already satisfied: charset-normalizer<4,>=2 in /usr/local/lib/python3.10/dist-packages (from requests<3,>=2->langchain) (3.3.2)\n",
+            "Requirement already satisfied: idna<4,>=2.5 in /usr/local/lib/python3.10/dist-packages (from requests<3,>=2->langchain) (3.8)\n",
+            "Requirement already satisfied: urllib3<3,>=1.21.1 in /usr/local/lib/python3.10/dist-packages (from requests<3,>=2->langchain) (2.0.7)\n",
+            "Requirement already satisfied: certifi>=2017.4.17 in /usr/local/lib/python3.10/dist-packages (from requests<3,>=2->langchain) (2024.8.30)\n",
+            "Requirement already satisfied: greenlet!=0.4.17 in /usr/local/lib/python3.10/dist-packages (from SQLAlchemy<3,>=1.4->langchain) (3.1.0)\n",
+            "Requirement already satisfied: anyio in /usr/local/lib/python3.10/dist-packages (from httpx<1,>=0.23.0->langsmith<0.2.0,>=0.1.17->langchain) (3.7.1)\n",
+            "Collecting httpcore==1.* (from httpx<1,>=0.23.0->langsmith<0.2.0,>=0.1.17->langchain)\n",
+            "  Downloading httpcore-1.0.5-py3-none-any.whl.metadata (20 kB)\n",
+            "Requirement already satisfied: sniffio in /usr/local/lib/python3.10/dist-packages (from httpx<1,>=0.23.0->langsmith<0.2.0,>=0.1.17->langchain) (1.3.1)\n",
+            "Collecting h11<0.15,>=0.13 (from httpcore==1.*->httpx<1,>=0.23.0->langsmith<0.2.0,>=0.1.17->langchain)\n",
+            "  Downloading h11-0.14.0-py3-none-any.whl.metadata (8.2 kB)\n",
+            "Collecting jsonpointer>=1.9 (from jsonpatch<2.0,>=1.33->langchain-core<0.4.0,>=0.3.0->langchain)\n",
+            "  Downloading jsonpointer-3.0.0-py2.py3-none-any.whl.metadata (2.3 kB)\n",
+            "Requirement already satisfied: exceptiongroup in /usr/local/lib/python3.10/dist-packages (from anyio->httpx<1,>=0.23.0->langsmith<0.2.0,>=0.1.17->langchain) (1.2.2)\n",
+            "Downloading langchain-0.3.0-py3-none-any.whl (1.0 MB)\n",
+            "\u001b[2K   \u001b[90m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\u001b[0m \u001b[32m1.0/1.0 MB\u001b[0m \u001b[31m24.6 MB/s\u001b[0m eta \u001b[36m0:00:00\u001b[0m\n",
+            "\u001b[?25hDownloading langchain_core-0.3.0-py3-none-any.whl (405 kB)\n",
+            "\u001b[2K   \u001b[90m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\u001b[0m \u001b[32m405.1/405.1 kB\u001b[0m \u001b[31m23.7 MB/s\u001b[0m eta \u001b[36m0:00:00\u001b[0m\n",
+            "\u001b[?25hDownloading langchain_text_splitters-0.3.0-py3-none-any.whl (25 kB)\n",
+            "Downloading langsmith-0.1.120-py3-none-any.whl (289 kB)\n",
+            "\u001b[2K   \u001b[90m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\u001b[0m \u001b[32m289.8/289.8 kB\u001b[0m \u001b[31m19.0 MB/s\u001b[0m eta \u001b[36m0:00:00\u001b[0m\n",
+            "\u001b[?25hDownloading tenacity-8.5.0-py3-none-any.whl (28 kB)\n",
+            "Downloading httpx-0.27.2-py3-none-any.whl (76 kB)\n",
+            "\u001b[2K   \u001b[90m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\u001b[0m \u001b[32m76.4/76.4 kB\u001b[0m \u001b[31m4.0 MB/s\u001b[0m eta \u001b[36m0:00:00\u001b[0m\n",
+            "\u001b[?25hDownloading httpcore-1.0.5-py3-none-any.whl (77 kB)\n",
+            "\u001b[2K   \u001b[90m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\u001b[0m \u001b[32m77.9/77.9 kB\u001b[0m \u001b[31m4.5 MB/s\u001b[0m eta \u001b[36m0:00:00\u001b[0m\n",
+            "\u001b[?25hDownloading jsonpatch-1.33-py2.py3-none-any.whl (12 kB)\n",
+            "Downloading orjson-3.10.7-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (141 kB)\n",
+            "\u001b[2K   \u001b[90m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\u001b[0m \u001b[32m141.9/141.9 kB\u001b[0m \u001b[31m8.8 MB/s\u001b[0m eta \u001b[36m0:00:00\u001b[0m\n",
+            "\u001b[?25hDownloading jsonpointer-3.0.0-py2.py3-none-any.whl (7.6 kB)\n",
+            "Downloading h11-0.14.0-py3-none-any.whl (58 kB)\n",
+            "\u001b[2K   \u001b[90m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\u001b[0m \u001b[32m58.3/58.3 kB\u001b[0m \u001b[31m3.9 MB/s\u001b[0m eta \u001b[36m0:00:00\u001b[0m\n",
+            "\u001b[?25hInstalling collected packages: tenacity, orjson, jsonpointer, h11, jsonpatch, httpcore, httpx, langsmith, langchain-core, langchain-text-splitters, langchain\n",
+            "  Attempting uninstall: tenacity\n",
+            "    Found existing installation: tenacity 9.0.0\n",
+            "    Uninstalling tenacity-9.0.0:\n",
+            "      Successfully uninstalled tenacity-9.0.0\n",
+            "Successfully installed h11-0.14.0 httpcore-1.0.5 httpx-0.27.2 jsonpatch-1.33 jsonpointer-3.0.0 langchain-0.3.0 langchain-core-0.3.0 langchain-text-splitters-0.3.0 langsmith-0.1.120 orjson-3.10.7 tenacity-8.5.0\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "!pip install langchain-openai"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "MrI2gN8a7MZP",
+        "outputId": "934acb34-b978-4bae-d376-3c4327472259"
+      },
+      "execution_count": 5,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "Collecting langchain-openai\n",
+            "  Downloading langchain_openai-0.2.0-py3-none-any.whl.metadata (2.6 kB)\n",
+            "Requirement already satisfied: langchain-core<0.4,>=0.3 in /usr/local/lib/python3.10/dist-packages (from langchain-openai) (0.3.0)\n",
+            "Collecting openai<2.0.0,>=1.40.0 (from langchain-openai)\n",
+            "  Downloading openai-1.45.0-py3-none-any.whl.metadata (22 kB)\n",
+            "Collecting tiktoken<1,>=0.7 (from langchain-openai)\n",
+            "  Downloading tiktoken-0.7.0-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (6.6 kB)\n",
+            "Requirement already satisfied: PyYAML>=5.3 in /usr/local/lib/python3.10/dist-packages (from langchain-core<0.4,>=0.3->langchain-openai) (6.0.2)\n",
+            "Requirement already satisfied: jsonpatch<2.0,>=1.33 in /usr/local/lib/python3.10/dist-packages (from langchain-core<0.4,>=0.3->langchain-openai) (1.33)\n",
+            "Requirement already satisfied: langsmith<0.2.0,>=0.1.117 in /usr/local/lib/python3.10/dist-packages (from langchain-core<0.4,>=0.3->langchain-openai) (0.1.120)\n",
+            "Requirement already satisfied: packaging<25,>=23.2 in /usr/local/lib/python3.10/dist-packages (from langchain-core<0.4,>=0.3->langchain-openai) (24.1)\n",
+            "Requirement already satisfied: pydantic<3.0.0,>=2.5.2 in /usr/local/lib/python3.10/dist-packages (from langchain-core<0.4,>=0.3->langchain-openai) (2.9.1)\n",
+            "Requirement already satisfied: tenacity!=8.4.0,<9.0.0,>=8.1.0 in /usr/local/lib/python3.10/dist-packages (from langchain-core<0.4,>=0.3->langchain-openai) (8.5.0)\n",
+            "Requirement already satisfied: typing-extensions>=4.7 in /usr/local/lib/python3.10/dist-packages (from langchain-core<0.4,>=0.3->langchain-openai) (4.12.2)\n",
+            "Requirement already satisfied: anyio<5,>=3.5.0 in /usr/local/lib/python3.10/dist-packages (from openai<2.0.0,>=1.40.0->langchain-openai) (3.7.1)\n",
+            "Requirement already satisfied: distro<2,>=1.7.0 in /usr/lib/python3/dist-packages (from openai<2.0.0,>=1.40.0->langchain-openai) (1.7.0)\n",
+            "Requirement already satisfied: httpx<1,>=0.23.0 in /usr/local/lib/python3.10/dist-packages (from openai<2.0.0,>=1.40.0->langchain-openai) (0.27.2)\n",
+            "Collecting jiter<1,>=0.4.0 (from openai<2.0.0,>=1.40.0->langchain-openai)\n",
+            "  Downloading jiter-0.5.0-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (3.6 kB)\n",
+            "Requirement already satisfied: sniffio in /usr/local/lib/python3.10/dist-packages (from openai<2.0.0,>=1.40.0->langchain-openai) (1.3.1)\n",
+            "Requirement already satisfied: tqdm>4 in /usr/local/lib/python3.10/dist-packages (from openai<2.0.0,>=1.40.0->langchain-openai) (4.66.5)\n",
+            "Requirement already satisfied: regex>=2022.1.18 in /usr/local/lib/python3.10/dist-packages (from tiktoken<1,>=0.7->langchain-openai) (2024.5.15)\n",
+            "Requirement already satisfied: requests>=2.26.0 in /usr/local/lib/python3.10/dist-packages (from tiktoken<1,>=0.7->langchain-openai) (2.32.3)\n",
+            "Requirement already satisfied: idna>=2.8 in /usr/local/lib/python3.10/dist-packages (from anyio<5,>=3.5.0->openai<2.0.0,>=1.40.0->langchain-openai) (3.8)\n",
+            "Requirement already satisfied: exceptiongroup in /usr/local/lib/python3.10/dist-packages (from anyio<5,>=3.5.0->openai<2.0.0,>=1.40.0->langchain-openai) (1.2.2)\n",
+            "Requirement already satisfied: certifi in /usr/local/lib/python3.10/dist-packages (from httpx<1,>=0.23.0->openai<2.0.0,>=1.40.0->langchain-openai) (2024.8.30)\n",
+            "Requirement already satisfied: httpcore==1.* in /usr/local/lib/python3.10/dist-packages (from httpx<1,>=0.23.0->openai<2.0.0,>=1.40.0->langchain-openai) (1.0.5)\n",
+            "Requirement already satisfied: h11<0.15,>=0.13 in /usr/local/lib/python3.10/dist-packages (from httpcore==1.*->httpx<1,>=0.23.0->openai<2.0.0,>=1.40.0->langchain-openai) (0.14.0)\n",
+            "Requirement already satisfied: jsonpointer>=1.9 in /usr/local/lib/python3.10/dist-packages (from jsonpatch<2.0,>=1.33->langchain-core<0.4,>=0.3->langchain-openai) (3.0.0)\n",
+            "Requirement already satisfied: orjson<4.0.0,>=3.9.14 in /usr/local/lib/python3.10/dist-packages (from langsmith<0.2.0,>=0.1.117->langchain-core<0.4,>=0.3->langchain-openai) (3.10.7)\n",
+            "Requirement already satisfied: annotated-types>=0.6.0 in /usr/local/lib/python3.10/dist-packages (from pydantic<3.0.0,>=2.5.2->langchain-core<0.4,>=0.3->langchain-openai) (0.7.0)\n",
+            "Requirement already satisfied: pydantic-core==2.23.3 in /usr/local/lib/python3.10/dist-packages (from pydantic<3.0.0,>=2.5.2->langchain-core<0.4,>=0.3->langchain-openai) (2.23.3)\n",
+            "Requirement already satisfied: charset-normalizer<4,>=2 in /usr/local/lib/python3.10/dist-packages (from requests>=2.26.0->tiktoken<1,>=0.7->langchain-openai) (3.3.2)\n",
+            "Requirement already satisfied: urllib3<3,>=1.21.1 in /usr/local/lib/python3.10/dist-packages (from requests>=2.26.0->tiktoken<1,>=0.7->langchain-openai) (2.0.7)\n",
+            "Downloading langchain_openai-0.2.0-py3-none-any.whl (51 kB)\n",
+            "\u001b[2K   \u001b[90m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\u001b[0m \u001b[32m51.5/51.5 kB\u001b[0m \u001b[31m2.3 MB/s\u001b[0m eta \u001b[36m0:00:00\u001b[0m\n",
+            "\u001b[?25hDownloading openai-1.45.0-py3-none-any.whl (374 kB)\n",
+            "\u001b[2K   \u001b[90m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\u001b[0m \u001b[32m374.1/374.1 kB\u001b[0m \u001b[31m10.1 MB/s\u001b[0m eta \u001b[36m0:00:00\u001b[0m\n",
+            "\u001b[?25hDownloading tiktoken-0.7.0-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (1.1 MB)\n",
+            "\u001b[2K   \u001b[90m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\u001b[0m \u001b[32m1.1/1.1 MB\u001b[0m \u001b[31m22.6 MB/s\u001b[0m eta \u001b[36m0:00:00\u001b[0m\n",
+            "\u001b[?25hDownloading jiter-0.5.0-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (318 kB)\n",
+            "\u001b[2K   \u001b[90m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\u001b[0m \u001b[32m318.9/318.9 kB\u001b[0m \u001b[31m20.0 MB/s\u001b[0m eta \u001b[36m0:00:00\u001b[0m\n",
+            "\u001b[?25hInstalling collected packages: jiter, tiktoken, openai, langchain-openai\n",
+            "Successfully installed jiter-0.5.0 langchain-openai-0.2.0 openai-1.45.0 tiktoken-0.7.0\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "!pip install langchain-community"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "H7Qrf69d7S9L",
+        "outputId": "550f1e33-3807-4446-bf05-9aa5c15bff02"
+      },
+      "execution_count": 6,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "Collecting langchain-community\n",
+            "  Downloading langchain_community-0.3.0-py3-none-any.whl.metadata (2.8 kB)\n",
+            "Requirement already satisfied: PyYAML>=5.3 in /usr/local/lib/python3.10/dist-packages (from langchain-community) (6.0.2)\n",
+            "Requirement already satisfied: SQLAlchemy<3,>=1.4 in /usr/local/lib/python3.10/dist-packages (from langchain-community) (2.0.34)\n",
+            "Requirement already satisfied: aiohttp<4.0.0,>=3.8.3 in /usr/local/lib/python3.10/dist-packages (from langchain-community) (3.10.5)\n",
+            "Collecting dataclasses-json<0.7,>=0.5.7 (from langchain-community)\n",
+            "  Downloading dataclasses_json-0.6.7-py3-none-any.whl.metadata (25 kB)\n",
+            "Requirement already satisfied: langchain<0.4.0,>=0.3.0 in /usr/local/lib/python3.10/dist-packages (from langchain-community) (0.3.0)\n",
+            "Requirement already satisfied: langchain-core<0.4.0,>=0.3.0 in /usr/local/lib/python3.10/dist-packages (from langchain-community) (0.3.0)\n",
+            "Requirement already satisfied: langsmith<0.2.0,>=0.1.112 in /usr/local/lib/python3.10/dist-packages (from langchain-community) (0.1.120)\n",
+            "Requirement already satisfied: numpy<2,>=1 in /usr/local/lib/python3.10/dist-packages (from langchain-community) (1.26.4)\n",
+            "Collecting pydantic-settings<3.0.0,>=2.4.0 (from langchain-community)\n",
+            "  Downloading pydantic_settings-2.5.2-py3-none-any.whl.metadata (3.5 kB)\n",
+            "Requirement already satisfied: requests<3,>=2 in /usr/local/lib/python3.10/dist-packages (from langchain-community) (2.32.3)\n",
+            "Requirement already satisfied: tenacity!=8.4.0,<9.0.0,>=8.1.0 in /usr/local/lib/python3.10/dist-packages (from langchain-community) (8.5.0)\n",
+            "Requirement already satisfied: aiohappyeyeballs>=2.3.0 in /usr/local/lib/python3.10/dist-packages (from aiohttp<4.0.0,>=3.8.3->langchain-community) (2.4.0)\n",
+            "Requirement already satisfied: aiosignal>=1.1.2 in /usr/local/lib/python3.10/dist-packages (from aiohttp<4.0.0,>=3.8.3->langchain-community) (1.3.1)\n",
+            "Requirement already satisfied: attrs>=17.3.0 in /usr/local/lib/python3.10/dist-packages (from aiohttp<4.0.0,>=3.8.3->langchain-community) (24.2.0)\n",
+            "Requirement already satisfied: frozenlist>=1.1.1 in /usr/local/lib/python3.10/dist-packages (from aiohttp<4.0.0,>=3.8.3->langchain-community) (1.4.1)\n",
+            "Requirement already satisfied: multidict<7.0,>=4.5 in /usr/local/lib/python3.10/dist-packages (from aiohttp<4.0.0,>=3.8.3->langchain-community) (6.1.0)\n",
+            "Requirement already satisfied: yarl<2.0,>=1.0 in /usr/local/lib/python3.10/dist-packages (from aiohttp<4.0.0,>=3.8.3->langchain-community) (1.11.1)\n",
+            "Requirement already satisfied: async-timeout<5.0,>=4.0 in /usr/local/lib/python3.10/dist-packages (from aiohttp<4.0.0,>=3.8.3->langchain-community) (4.0.3)\n",
+            "Collecting marshmallow<4.0.0,>=3.18.0 (from dataclasses-json<0.7,>=0.5.7->langchain-community)\n",
+            "  Downloading marshmallow-3.22.0-py3-none-any.whl.metadata (7.2 kB)\n",
+            "Collecting typing-inspect<1,>=0.4.0 (from dataclasses-json<0.7,>=0.5.7->langchain-community)\n",
+            "  Downloading typing_inspect-0.9.0-py3-none-any.whl.metadata (1.5 kB)\n",
+            "Requirement already satisfied: langchain-text-splitters<0.4.0,>=0.3.0 in /usr/local/lib/python3.10/dist-packages (from langchain<0.4.0,>=0.3.0->langchain-community) (0.3.0)\n",
+            "Requirement already satisfied: pydantic<3.0.0,>=2.7.4 in /usr/local/lib/python3.10/dist-packages (from langchain<0.4.0,>=0.3.0->langchain-community) (2.9.1)\n",
+            "Requirement already satisfied: jsonpatch<2.0,>=1.33 in /usr/local/lib/python3.10/dist-packages (from langchain-core<0.4.0,>=0.3.0->langchain-community) (1.33)\n",
+            "Requirement already satisfied: packaging<25,>=23.2 in /usr/local/lib/python3.10/dist-packages (from langchain-core<0.4.0,>=0.3.0->langchain-community) (24.1)\n",
+            "Requirement already satisfied: typing-extensions>=4.7 in /usr/local/lib/python3.10/dist-packages (from langchain-core<0.4.0,>=0.3.0->langchain-community) (4.12.2)\n",
+            "Requirement already satisfied: httpx<1,>=0.23.0 in /usr/local/lib/python3.10/dist-packages (from langsmith<0.2.0,>=0.1.112->langchain-community) (0.27.2)\n",
+            "Requirement already satisfied: orjson<4.0.0,>=3.9.14 in /usr/local/lib/python3.10/dist-packages (from langsmith<0.2.0,>=0.1.112->langchain-community) (3.10.7)\n",
+            "Collecting python-dotenv>=0.21.0 (from pydantic-settings<3.0.0,>=2.4.0->langchain-community)\n",
+            "  Downloading python_dotenv-1.0.1-py3-none-any.whl.metadata (23 kB)\n",
+            "Requirement already satisfied: charset-normalizer<4,>=2 in /usr/local/lib/python3.10/dist-packages (from requests<3,>=2->langchain-community) (3.3.2)\n",
+            "Requirement already satisfied: idna<4,>=2.5 in /usr/local/lib/python3.10/dist-packages (from requests<3,>=2->langchain-community) (3.8)\n",
+            "Requirement already satisfied: urllib3<3,>=1.21.1 in /usr/local/lib/python3.10/dist-packages (from requests<3,>=2->langchain-community) (2.0.7)\n",
+            "Requirement already satisfied: certifi>=2017.4.17 in /usr/local/lib/python3.10/dist-packages (from requests<3,>=2->langchain-community) (2024.8.30)\n",
+            "Requirement already satisfied: greenlet!=0.4.17 in /usr/local/lib/python3.10/dist-packages (from SQLAlchemy<3,>=1.4->langchain-community) (3.1.0)\n",
+            "Requirement already satisfied: anyio in /usr/local/lib/python3.10/dist-packages (from httpx<1,>=0.23.0->langsmith<0.2.0,>=0.1.112->langchain-community) (3.7.1)\n",
+            "Requirement already satisfied: httpcore==1.* in /usr/local/lib/python3.10/dist-packages (from httpx<1,>=0.23.0->langsmith<0.2.0,>=0.1.112->langchain-community) (1.0.5)\n",
+            "Requirement already satisfied: sniffio in /usr/local/lib/python3.10/dist-packages (from httpx<1,>=0.23.0->langsmith<0.2.0,>=0.1.112->langchain-community) (1.3.1)\n",
+            "Requirement already satisfied: h11<0.15,>=0.13 in /usr/local/lib/python3.10/dist-packages (from httpcore==1.*->httpx<1,>=0.23.0->langsmith<0.2.0,>=0.1.112->langchain-community) (0.14.0)\n",
+            "Requirement already satisfied: jsonpointer>=1.9 in /usr/local/lib/python3.10/dist-packages (from jsonpatch<2.0,>=1.33->langchain-core<0.4.0,>=0.3.0->langchain-community) (3.0.0)\n",
+            "Requirement already satisfied: annotated-types>=0.6.0 in /usr/local/lib/python3.10/dist-packages (from pydantic<3.0.0,>=2.7.4->langchain<0.4.0,>=0.3.0->langchain-community) (0.7.0)\n",
+            "Requirement already satisfied: pydantic-core==2.23.3 in /usr/local/lib/python3.10/dist-packages (from pydantic<3.0.0,>=2.7.4->langchain<0.4.0,>=0.3.0->langchain-community) (2.23.3)\n",
+            "Collecting mypy-extensions>=0.3.0 (from typing-inspect<1,>=0.4.0->dataclasses-json<0.7,>=0.5.7->langchain-community)\n",
+            "  Downloading mypy_extensions-1.0.0-py3-none-any.whl.metadata (1.1 kB)\n",
+            "Requirement already satisfied: exceptiongroup in /usr/local/lib/python3.10/dist-packages (from anyio->httpx<1,>=0.23.0->langsmith<0.2.0,>=0.1.112->langchain-community) (1.2.2)\n",
+            "Downloading langchain_community-0.3.0-py3-none-any.whl (2.3 MB)\n",
+            "\u001b[2K   \u001b[90m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\u001b[0m \u001b[32m2.3/2.3 MB\u001b[0m \u001b[31m33.7 MB/s\u001b[0m eta \u001b[36m0:00:00\u001b[0m\n",
+            "\u001b[?25hDownloading dataclasses_json-0.6.7-py3-none-any.whl (28 kB)\n",
+            "Downloading pydantic_settings-2.5.2-py3-none-any.whl (26 kB)\n",
+            "Downloading marshmallow-3.22.0-py3-none-any.whl (49 kB)\n",
+            "\u001b[2K   \u001b[90m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\u001b[0m \u001b[32m49.3/49.3 kB\u001b[0m \u001b[31m2.9 MB/s\u001b[0m eta \u001b[36m0:00:00\u001b[0m\n",
+            "\u001b[?25hDownloading python_dotenv-1.0.1-py3-none-any.whl (19 kB)\n",
+            "Downloading typing_inspect-0.9.0-py3-none-any.whl (8.8 kB)\n",
+            "Downloading mypy_extensions-1.0.0-py3-none-any.whl (4.7 kB)\n",
+            "Installing collected packages: python-dotenv, mypy-extensions, marshmallow, typing-inspect, pydantic-settings, dataclasses-json, langchain-community\n",
+            "Successfully installed dataclasses-json-0.6.7 langchain-community-0.3.0 marshmallow-3.22.0 mypy-extensions-1.0.0 pydantic-settings-2.5.2 python-dotenv-1.0.1 typing-inspect-0.9.0\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "pip install -U langchain-openai"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "5ThWbmx27mJ9",
+        "outputId": "bdf62b53-81b1-4204-be97-d130cca49b4b"
+      },
+      "execution_count": 7,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "Requirement already satisfied: langchain-openai in /usr/local/lib/python3.10/dist-packages (0.2.0)\n",
+            "Requirement already satisfied: langchain-core<0.4,>=0.3 in /usr/local/lib/python3.10/dist-packages (from langchain-openai) (0.3.0)\n",
+            "Requirement already satisfied: openai<2.0.0,>=1.40.0 in /usr/local/lib/python3.10/dist-packages (from langchain-openai) (1.45.0)\n",
+            "Requirement already satisfied: tiktoken<1,>=0.7 in /usr/local/lib/python3.10/dist-packages (from langchain-openai) (0.7.0)\n",
+            "Requirement already satisfied: PyYAML>=5.3 in /usr/local/lib/python3.10/dist-packages (from langchain-core<0.4,>=0.3->langchain-openai) (6.0.2)\n",
+            "Requirement already satisfied: jsonpatch<2.0,>=1.33 in /usr/local/lib/python3.10/dist-packages (from langchain-core<0.4,>=0.3->langchain-openai) (1.33)\n",
+            "Requirement already satisfied: langsmith<0.2.0,>=0.1.117 in /usr/local/lib/python3.10/dist-packages (from langchain-core<0.4,>=0.3->langchain-openai) (0.1.120)\n",
+            "Requirement already satisfied: packaging<25,>=23.2 in /usr/local/lib/python3.10/dist-packages (from langchain-core<0.4,>=0.3->langchain-openai) (24.1)\n",
+            "Requirement already satisfied: pydantic<3.0.0,>=2.5.2 in /usr/local/lib/python3.10/dist-packages (from langchain-core<0.4,>=0.3->langchain-openai) (2.9.1)\n",
+            "Requirement already satisfied: tenacity!=8.4.0,<9.0.0,>=8.1.0 in /usr/local/lib/python3.10/dist-packages (from langchain-core<0.4,>=0.3->langchain-openai) (8.5.0)\n",
+            "Requirement already satisfied: typing-extensions>=4.7 in /usr/local/lib/python3.10/dist-packages (from langchain-core<0.4,>=0.3->langchain-openai) (4.12.2)\n",
+            "Requirement already satisfied: anyio<5,>=3.5.0 in /usr/local/lib/python3.10/dist-packages (from openai<2.0.0,>=1.40.0->langchain-openai) (3.7.1)\n",
+            "Requirement already satisfied: distro<2,>=1.7.0 in /usr/lib/python3/dist-packages (from openai<2.0.0,>=1.40.0->langchain-openai) (1.7.0)\n",
+            "Requirement already satisfied: httpx<1,>=0.23.0 in /usr/local/lib/python3.10/dist-packages (from openai<2.0.0,>=1.40.0->langchain-openai) (0.27.2)\n",
+            "Requirement already satisfied: jiter<1,>=0.4.0 in /usr/local/lib/python3.10/dist-packages (from openai<2.0.0,>=1.40.0->langchain-openai) (0.5.0)\n",
+            "Requirement already satisfied: sniffio in /usr/local/lib/python3.10/dist-packages (from openai<2.0.0,>=1.40.0->langchain-openai) (1.3.1)\n",
+            "Requirement already satisfied: tqdm>4 in /usr/local/lib/python3.10/dist-packages (from openai<2.0.0,>=1.40.0->langchain-openai) (4.66.5)\n",
+            "Requirement already satisfied: regex>=2022.1.18 in /usr/local/lib/python3.10/dist-packages (from tiktoken<1,>=0.7->langchain-openai) (2024.5.15)\n",
+            "Requirement already satisfied: requests>=2.26.0 in /usr/local/lib/python3.10/dist-packages (from tiktoken<1,>=0.7->langchain-openai) (2.32.3)\n",
+            "Requirement already satisfied: idna>=2.8 in /usr/local/lib/python3.10/dist-packages (from anyio<5,>=3.5.0->openai<2.0.0,>=1.40.0->langchain-openai) (3.8)\n",
+            "Requirement already satisfied: exceptiongroup in /usr/local/lib/python3.10/dist-packages (from anyio<5,>=3.5.0->openai<2.0.0,>=1.40.0->langchain-openai) (1.2.2)\n",
+            "Requirement already satisfied: certifi in /usr/local/lib/python3.10/dist-packages (from httpx<1,>=0.23.0->openai<2.0.0,>=1.40.0->langchain-openai) (2024.8.30)\n",
+            "Requirement already satisfied: httpcore==1.* in /usr/local/lib/python3.10/dist-packages (from httpx<1,>=0.23.0->openai<2.0.0,>=1.40.0->langchain-openai) (1.0.5)\n",
+            "Requirement already satisfied: h11<0.15,>=0.13 in /usr/local/lib/python3.10/dist-packages (from httpcore==1.*->httpx<1,>=0.23.0->openai<2.0.0,>=1.40.0->langchain-openai) (0.14.0)\n",
+            "Requirement already satisfied: jsonpointer>=1.9 in /usr/local/lib/python3.10/dist-packages (from jsonpatch<2.0,>=1.33->langchain-core<0.4,>=0.3->langchain-openai) (3.0.0)\n",
+            "Requirement already satisfied: orjson<4.0.0,>=3.9.14 in /usr/local/lib/python3.10/dist-packages (from langsmith<0.2.0,>=0.1.117->langchain-core<0.4,>=0.3->langchain-openai) (3.10.7)\n",
+            "Requirement already satisfied: annotated-types>=0.6.0 in /usr/local/lib/python3.10/dist-packages (from pydantic<3.0.0,>=2.5.2->langchain-core<0.4,>=0.3->langchain-openai) (0.7.0)\n",
+            "Requirement already satisfied: pydantic-core==2.23.3 in /usr/local/lib/python3.10/dist-packages (from pydantic<3.0.0,>=2.5.2->langchain-core<0.4,>=0.3->langchain-openai) (2.23.3)\n",
+            "Requirement already satisfied: charset-normalizer<4,>=2 in /usr/local/lib/python3.10/dist-packages (from requests>=2.26.0->tiktoken<1,>=0.7->langchain-openai) (3.3.2)\n",
+            "Requirement already satisfied: urllib3<3,>=1.21.1 in /usr/local/lib/python3.10/dist-packages (from requests>=2.26.0->tiktoken<1,>=0.7->langchain-openai) (2.0.7)\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "from langchain.llms import OpenAI"
+      ],
+      "metadata": {
+        "id": "fFNSu6IZ7ZkK"
+      },
+      "execution_count": 8,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "llm = OpenAI(openai_api_key=api_key)"
+      ],
+      "metadata": {
+        "id": "L2FsAaz17eAG",
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "outputId": "7c9b958c-126f-409e-bda3-d0d98e786541"
+      },
+      "execution_count": 9,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stderr",
+          "text": [
+            "<ipython-input-9-b75fa91e6d9b>:1: LangChainDeprecationWarning: The class `OpenAI` was deprecated in LangChain 0.0.10 and will be removed in 1.0. An updated version of the class exists in the langchain-openai package and should be used instead. To use it run `pip install -U langchain-openai` and import as `from langchain_openai import OpenAI`.\n",
+            "  llm = OpenAI(openai_api_key=api_key)\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "print(llm.invoke('Sing an old time bluegrass song with lyrics:'))"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "-VPJbk7U7x03",
+        "outputId": "c3747e9a-30e0-45fb-e15f-3cc2f486e5db"
+      },
+      "execution_count": 10,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "\n",
+            "\n",
+            "Verse 1:\n",
+            "I'm just a simple mountain man\n",
+            "Living off the land\n",
+            "Spend my days picking on my guitar\n",
+            "With my trusty old banjo in my hand\n",
+            "\n",
+            "Chorus:\n",
+            "Oh how I love that old time bluegrass sound\n",
+            "Makes my heart sing, it's the best around\n",
+            "With every strum and every note\n",
+            "I'm transported to a simpler time, I float\n",
+            "\n",
+            "Verse 2:\n",
+            "I grew up in these hills so green\n",
+            "Where the air is fresh and the water clean\n",
+            "My daddy taught me how to play\n",
+            "And now it's how I spend my days\n",
+            "\n",
+            "Chorus:\n",
+            "Oh how I love that old time bluegrass sound\n",
+            "Makes my heart sing, it's the best around\n",
+            "With every strum and every note\n",
+            "I'm transported to a simpler time, I float\n",
+            "\n",
+            "Verse 3:\n",
+            "I've played in bars and I've played in barns\n",
+            "Folks always gather, they love the charm\n",
+            "Of these old songs that tell a story\n",
+            "Of hard work, love, and a little bit of glory\n",
+            "\n",
+            "Chorus:\n",
+            "Oh how I love that old time bluegrass sound\n",
+            "Makes my heart sing, it's the best around\n",
+            "With every strum and every note\n",
+            "I'm transported to a simpler\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "result = llm.generate(['Sing an old time bluegrass song with lyrics:',\n",
+        "                     'Explain the meaning behind the song']\n",
+        "                     )"
+      ],
+      "metadata": {
+        "id": "UMmTgP4h75GV"
+      },
+      "execution_count": 11,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "result.generations"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "4lbVyj-m79pJ",
+        "outputId": "20d60c84-a318-4a55-84e0-ddcc4820c914"
+      },
+      "execution_count": 12,
+      "outputs": [
+        {
+          "output_type": "execute_result",
+          "data": {
+            "text/plain": [
+              "[[Generation(text=\"\\n\\nOh the sun is sinking low\\nThe moon is rising high\\nThe stars are shining bright\\nIn that old Kentucky sky\\n\\nI'm sitting on the porch\\nStrumming on my guitar\\nSinging an old time bluegrass song\\nUnderneath the stars\\n\\nChorus:\\nOh the fiddle's playing sweet\\nThe banjo's picking low\\nThe mandolin's a-tapping\\nTo the rhythm of the show\\n\\nWe're singing about love\\nWe're singing about pain\\nWe're singing about the mountains\\nAnd the pouring rain\\n\\nFrom the hills of Carolina\\nTo the fields of Tennessee\\nWe'll keep on playing\\nThis old bluegrass melody\\n\\nChorus:\\nOh the fiddle's playing sweet\\nThe banjo's picking low\\nThe mandolin's a-tapping\\nTo the rhythm of the show\\n\\nSo come on gather 'round\\nAnd join in on the fun\\nWe'll keep on singing\\nTill the rising of the sun\\n\\nWith our voices and our strings\\nWe'll make the music ring\\nIn this old time bluegrass song\\nWe'll keep on singing\\n\\nChorus:\\nOh the fiddle's playing sweet\\nThe banjo's picking low\\nThe mandolin's a-tapping\\nTo the rhythm of the show\", generation_info={'finish_reason': 'length', 'logprobs': None})],\n",
+              " [Generation(text='\\n\\nThe meaning behind the song can vary depending on the interpretation of the listener. However, generally, the song is about the struggles of life and the need for perseverance and hope in the face of adversity. It could also be seen as a reflection on the ups and downs of relationships and the importance of communication and understanding. The lyrics suggest feelings of confusion, frustration, and longing, while also emphasizing the importance of staying true to oneself and not giving up on love. Ultimately, the song is about the complexities of human emotions and the power of resilience.', generation_info={'finish_reason': 'stop', 'logprobs': None})]]"
+            ]
+          },
+          "metadata": {},
+          "execution_count": 12
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "print(result.generations[0][0].text)"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "HY7CDpXx8C9A",
+        "outputId": "0a3bea59-9054-4f05-c700-9c61f5a904e7"
+      },
+      "execution_count": 13,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "\n",
+            "\n",
+            "Oh the sun is sinking low\n",
+            "The moon is rising high\n",
+            "The stars are shining bright\n",
+            "In that old Kentucky sky\n",
+            "\n",
+            "I'm sitting on the porch\n",
+            "Strumming on my guitar\n",
+            "Singing an old time bluegrass song\n",
+            "Underneath the stars\n",
+            "\n",
+            "Chorus:\n",
+            "Oh the fiddle's playing sweet\n",
+            "The banjo's picking low\n",
+            "The mandolin's a-tapping\n",
+            "To the rhythm of the show\n",
+            "\n",
+            "We're singing about love\n",
+            "We're singing about pain\n",
+            "We're singing about the mountains\n",
+            "And the pouring rain\n",
+            "\n",
+            "From the hills of Carolina\n",
+            "To the fields of Tennessee\n",
+            "We'll keep on playing\n",
+            "This old bluegrass melody\n",
+            "\n",
+            "Chorus:\n",
+            "Oh the fiddle's playing sweet\n",
+            "The banjo's picking low\n",
+            "The mandolin's a-tapping\n",
+            "To the rhythm of the show\n",
+            "\n",
+            "So come on gather 'round\n",
+            "And join in on the fun\n",
+            "We'll keep on singing\n",
+            "Till the rising of the sun\n",
+            "\n",
+            "With our voices and our strings\n",
+            "We'll make the music ring\n",
+            "In this old time bluegrass song\n",
+            "We'll keep on singing\n",
+            "\n",
+            "Chorus:\n",
+            "Oh the fiddle's playing sweet\n",
+            "The banjo's picking low\n",
+            "The mandolin's a-tapping\n",
+            "To the rhythm of the show\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "print(result.generations[1][0].text)"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "5NmYbH0B8IG9",
+        "outputId": "16011f8f-d71a-48b0-f90c-5af3693993c1"
+      },
+      "execution_count": 14,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "\n",
+            "\n",
+            "The meaning behind the song can vary depending on the interpretation of the listener. However, generally, the song is about the struggles of life and the need for perseverance and hope in the face of adversity. It could also be seen as a reflection on the ups and downs of relationships and the importance of communication and understanding. The lyrics suggest feelings of confusion, frustration, and longing, while also emphasizing the importance of staying true to oneself and not giving up on love. Ultimately, the song is about the complexities of human emotions and the power of resilience.\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "from langchain_openai import ChatOpenAI\n",
+        "\n",
+        "chat = ChatOpenAI(openai_api_key=api_key)"
+      ],
+      "metadata": {
+        "id": "oBiwvcz59N3-"
+      },
+      "execution_count": 15,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "from langchain.schema import (\n",
+        "    AIMessage,\n",
+        "    HumanMessage,\n",
+        "    SystemMessage\n",
+        ")"
+      ],
+      "metadata": {
+        "id": "Weeij15b9jDU"
+      },
+      "execution_count": 16,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "result = chat.generate(\n",
+        "                [\n",
+        "                [SystemMessage(content='You are a University Professor'),\n",
+        "               HumanMessage(content='Can you tell me a fact about psychology')]\n",
+        "                ]\n",
+        "                    )"
+      ],
+      "metadata": {
+        "id": "t95JIUx09_1R"
+      },
+      "execution_count": 19,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "result.generations[0][0].text"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/",
+          "height": 53
+        },
+        "id": "7NuqwQGb-Sro",
+        "outputId": "3c7ae6a7-63be-40d0-9721-bef434b78b95"
+      },
+      "execution_count": 20,
+      "outputs": [
+        {
+          "output_type": "execute_result",
+          "data": {
+            "text/plain": [
+              "\"Certainly! A fascinating fact about psychology is that the brain's prefrontal cortex, which is responsible for decision-making and self-control, is not fully developed until around the age of 25. This helps explain why young adults often struggle with impulse control and decision-making compared to older adults.\""
+            ],
+            "application/vnd.google.colaboratory.intrinsic+json": {
+              "type": "string"
+            }
+          },
+          "metadata": {},
+          "execution_count": 20
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "result = chat([SystemMessage(content='You are a University Professor'),\n",
+        "               HumanMessage(content='Can you tell me a fact about political science?')],\n",
+        "                 temperature=2,presence_penalty=2,max_tokens=40)"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "I_cgzjtG-s2J",
+        "outputId": "3861c812-cb03-4db2-9544-856b3e0ca50a"
+      },
+      "execution_count": 21,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stderr",
+          "text": [
+            "<ipython-input-21-78d13f2c99a1>:1: LangChainDeprecationWarning: The method `BaseChatModel.__call__` was deprecated in langchain-core 0.1.7 and will be removed in 1.0. Use invoke instead.\n",
+            "  result = chat([SystemMessage(content='You are a University Professor'),\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "result.content"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/",
+          "height": 53
+        },
+        "id": "PBsHWFvQ-b0A",
+        "outputId": "97fe6bfc-b167-47b7-dbc1-978e93cae234"
+      },
+      "execution_count": 22,
+      "outputs": [
+        {
+          "output_type": "execute_result",
+          "data": {
+            "text/plain": [
+              "'Certainly! One interesting fact in political science is that France has more political parties than any other democracy in the world and within spaces\\r\\n\\ntribenary\\t\\t\\t\\t\\t\\t\\t\\t\\t\\t\\t\\t\\t\\t\\t\\t\\tascii(dd)\\ntotal_exist aim stickerComing\\ttemplate_mean On'"
+            ],
+            "application/vnd.google.colaboratory.intrinsic+json": {
+              "type": "string"
+            }
+          },
+          "metadata": {},
+          "execution_count": 22
+        }
+      ]
+    }
+  ]
+}
